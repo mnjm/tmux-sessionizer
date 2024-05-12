@@ -83,7 +83,7 @@ switch() {
     # fzf through entries
     local selected=$( echo "$(list_sessions) $(list_file_entries)" | $FZF_COMMAND \
         --reverse --no-multi --print-query --delimiter=' ' --nth=2 --with-nth=1,2 \
-        --preview "tmux-sessionizer __preview__ {}" --preview-window right,70% | tail -n1 )
+        --preview "tmux-sessionizer __preview__ {}" --preview-window right,80% | tail -n1 )
     # split name and path
     local name=$(echo $selected | cut -f2 -d' ')
     local path=$(echo $selected | cut -f3 -d' ')
