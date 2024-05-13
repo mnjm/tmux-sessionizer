@@ -19,7 +19,7 @@ FZF_COMMAND=${TMUX_SEZ_FZF_COMMAND:-"fzf --height 100%"}
 
 display_help() {
     echo "TMUX Sessionizer - fzf based tmux session/project switcher"
-    echo "For more info check https://github.com/mnjm/tmux-sessionizer"
+    echo "For more info check https://github.com/mnjm/tmux-sessionizer/blob/main/README.md"
 }
 
 # List tmux session names with color codes
@@ -47,10 +47,15 @@ list_file_entries() {
 
 # tmux session switcher
 switch() {
+    local sessions=$(list_sessions)
+    local file_entries=$(list_file_entries)
+    [ ! -z "$sessions" ] && [ ! -z "$file_entries" ] && sessions="${sessions}\n"
+
     # fzf through both list_sessions and list_file_entries
-    local selected=$( echo -e "$(list_sessions)\n$(list_file_entries)" | $FZF_COMMAND \
+    local selected=$( echo -e "$sessions$file_entries" | $FZF_COMMAND \
         --reverse --no-multi --print-query --delimiter=' ' --with-nth=1 --ansi \
         --preview "tmux-sessionizer __preview__ {}" --preview-window right,80% | tail -n1 )
+
     # split name and path
     local name=$(echo $selected | cut -f1 -d' ')
     local path=$(echo $selected | cut -f2 -d' ')
@@ -119,8 +124,8 @@ sanitize_list_file() {
 add_to_list_file() {
     local path=$1
     local name=$2
-    [ -z $1 ] && path=$PWD # if path not providied use $PWD
-    [ -z $2 ] && name=$(basename $path) # if name not providid, use basename
+    [ -z "$1" ] && path=$PWD # if path not providied use $PWD
+    [ -z "$2" ] && name=$(basename $path) # if name not providid, use basename
 
     # dots doesnt work in session_name, replace with _
     name=$(echo $name | tr '.' '_')
@@ -137,6 +142,7 @@ case $1 in
     add) add_to_list_file $2 $3;;
     switch) switch ;;
     sanitize) sanitize_list_file ;;
+    edit) ${EDITOR:-vi} $LIST_FILE ;;
     __preview__) tmux_sessionzier_previewer "$2";;
     *) display_help ;;
 esac

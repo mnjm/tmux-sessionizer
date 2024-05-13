@@ -32,14 +32,15 @@ TMUX Sessionizer is a fzf-based tmux session and project switcher written in Bas
    ln -s $(realpath tmux-sessionizer) ~/.local/bin/
    ```
 
-4. (Optional) you can add it as an alias in your shell config (.bashrc or .zshrc):
+3. (Optional) you can add it as an alias in your shell config (.bashrc or .zshrc):
 
    ```bash
    alias tmuxs='tmux-sessionizer switch'
    alias tmuxs-add='tmux-sessionizer add'
+   alias tmuxs-edit='tmux-sessionizer edit'
    ```
 
-3. (Optional) you can add it as a binding in your tmux config (.tmux.conf):
+4. (Optional) you can add it as a binding in your tmux config (.tmux.conf):
 
    ```tmux
    bind s display-popup 'tmux-sessionizer switch'
@@ -47,8 +48,9 @@ TMUX Sessionizer is a fzf-based tmux session and project switcher written in Bas
 
 ### Commands
 
-- `tmux-sessionizer add [path] [name]`: Add a new entry to the list file with the specified path and session name. If no name is provided, it defaults to the basename of the path. If neither name nor path is provided, it uses the current directory, setting the session name as the current directory's name.
 - `tmux-sessionizer switch`: Switch to an existing session or create a new session based on the selected entry from the list.
+- `tmux-sessionizer add [path] [name]`: Add a new entry to the list file with the specified path and session name. If no name is provided, it defaults to the basename of the path. If neither name nor path is provided, it uses the current directory, setting the session name as the current directory's name.
+- `tmux-sessionizer edit`: Opens the sessionizer list file in editor. Refers `$EDITOR`, if not provided defaults to `vi`.
 - `tmux-sessionizer sanitize`: Remove duplicate and non-reachable entries from the list file.
 
 ## Configuration
