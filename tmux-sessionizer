@@ -15,7 +15,7 @@
 
 LIST_FILE=${TMUX_SEZ_LIST_FILE:-"$HOME/.projects-tmux-sessionizer.list"}
 FZF_COMMAND=${TMUX_SEZ_FZF_COMMAND:-"fzf --height 100%"}
-[ -f "$LIST_FILE" ] && touch $LIST_FILE # Create list file if doesnt exists
+[ -f "$LIST_FILE" ] || touch $LIST_FILE # Create list file if doesnt exists
 
 display_help() {
     echo "TMUX Sessionizer - fzf based tmux session/project switcher"
