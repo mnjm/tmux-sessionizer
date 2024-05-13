@@ -29,39 +29,6 @@ display_help() {
     echo "switch - opens tmux session switcher"
 }
 
-add_to_list_file() {
-    # adds an entry into Project list file
-    local name=$1
-    local path=$2
-    if [ -z $2 ]; then
-        path=$PWD
-    fi
-    if [ -z $1 ]; then
-        name=$(basename $path)
-    fi
-    # dots doesnt work in session_name, replace with _
-    name=$(echo $name | tr '.' '_')
-    # add a new entry to PROJECTS_LIST_FILE
-    echo "$name $path" >> $PROJECTS_LIST_FILE
-    # Remove any duplicates in the list
-    gawk -i inplace '!a[$0]++' $PROJECTS_LIST_FILE
-    pretty_print "Added $name -> $path to $PROJECTS_LIST_FILE"
-}
-
-tmux_sessionzier_previewer() {
-    # function reserved to be called as fzf previewer
-    local name=$(echo $1 | cut -f2 -d' ')
-    local path=$(echo $1 | cut -f3 -d' ')
-    if tmux has-session -t $name 2>/dev/null; then
-        tmux capture-pane -e -pt $name
-    else
-        tput setaf 8; echo -n "Session Name: "; tput setaf 3; echo "$name"; tput sgr0
-        tput setaf 8; echo -n "Dir: "; tput setaf 6; echo "$path"; tput sgr0
-        pretty_print "--------------------------------" 8
-        ls --color=always $path
-    fi
-}
-
 list_sessions() {
     # echo sessions
     tmux list-sessions -F "#{session_name}" 2>> /dev/null | while read sess; do
@@ -101,9 +68,66 @@ switch() {
     fi
 }
 
+tmux_sessionzier_previewer() {
+    # function reserved to be called as fzf previewer
+    local name=$(echo $1 | cut -f2 -d' ')
+    local path=$(echo $1 | cut -f3 -d' ')
+    if tmux has-session -t $name 2>/dev/null; then
+        tmux capture-pane -e -pt $name
+    else
+        tput setaf 8; echo -n "Session Name: "; tput setaf 3; echo "$name"; tput sgr0
+        tput setaf 8; echo -n "Dir: "; tput setaf 6; echo "$path"; tput sgr0
+        pretty_print "--------------------------------" 8
+        ls --group-directories-first --color=always $path
+    fi
+}
+
+# remove duplicates and deleted dirs, replace . in session names with _
+sanitize_list_file() {
+    echo "Sanitizing $PROJECTS_LIST_FILE"
+    # Remove any duplicates in the list
+    gawk -i inplace '!a[$0]++' $PROJECTS_LIST_FILE
+
+    local tmp_file=$(mktemp tms.XXXXX -p /tmp/)
+
+    # go through each entry and sanitize
+    cat $PROJECTS_LIST_FILE | while read line; do 
+        local name="${line% *}"
+        local path="${line#* }"
+        name=$(echo $name | tr '.' '_')
+        if [ -d "$path" ]; then
+            echo "$name $path" >> $tmp_file
+        else
+            pretty_print "Skipping $name: Dir not found $path" 1
+        fi
+    done
+
+    mv $tmp_file $PROJECTS_LIST_FILE
+}
+
+add_to_list_file() {
+    # adds an entry into Project list file
+    local name=$1
+    local path=$2
+    if [ -z $2 ]; then
+        path=$PWD
+    fi
+    if [ -z $1 ]; then
+        name=$(basename $path)
+    fi
+    # dots doesnt work in session_name, replace with _
+    name=$(echo $name | tr '.' '_')
+    # add a new entry to PROJECTS_LIST_FILE
+    echo "$name $path" >> $PROJECTS_LIST_FILE
+    pretty_print "Added $name -> $path to $PROJECTS_LIST_FILE"
+
+    sanitize_list_file
+}
+
 case $1 in
     add) add_to_list_file $2 $3;;
     switch) switch ;;
+    sanitize) sanitize_list_file ;;
     __preview__) tmux_sessionzier_previewer "$2";;
     *) display_help ;;
 esac

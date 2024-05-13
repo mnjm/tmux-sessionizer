@@ -3,9 +3,9 @@ Tmux Sessionizer: Bash script for creating/switching between tmux sessions using
 
 Options:
 
-tmux-sessionzier add <name> <path> - adds the entry to the switcher list (<name> - session name, <path> - dir where tmux session should start from)
-
-tmux-sessionizer switch - opens tmux session switcher
+- `tmux-sessionizer switch` - opens tmux session switcher
+- `tmux-sessionzier add <name> <path>` - adds the entry to the switcher list (<name> - session name, <path> - dir where tmux session should start from)
+- `tmux-sessionzier sanitize` - Sanitize and clean up projects list file
 
 Install:
 
