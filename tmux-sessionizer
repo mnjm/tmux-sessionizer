@@ -24,8 +24,13 @@ display_help() {
 
 # List tmux session names with color codes
 list_sessions() {
+    local cur_sess=""
+    [ -v TMUX ] && cur_sess=$(tmux display-message -p "#S")
     tmux list-sessions -F "#{session_name}" 2>> /dev/null | while read sess; do
-        echo -e "\e[32m${sess}\e[0m"
+        # skip current session
+        if [[ $sess != $cur_sess ]]; then
+            echo -e "\e[32m${sess}\e[0m"
+        fi
     done
 }
 
@@ -54,8 +59,7 @@ switch() {
 
     # create / switch to selected session
     if [[ -n $selected ]]; then
-        local tmux_running=$(pgrep tmux)
-        if [ [ -z "$TMUX" ] && [ -z "$tmux_running" ] ]; then # if tmux is not running
+        if [[ -z "$TMUX" ]]; then # if tmux is not running
             tmux new -As $name -c $path
         else
             if  ! tmux has-session -t $name 2>/dev/null; then # if session not found
@@ -108,15 +112,15 @@ sanitize_list_file() {
     # update the file
     mv $LIST_FILE $LIST_FILE.old
     mv $tmp_file $LIST_FILE
-    echo "Updated ${LIST_FILE}. old file can be found in ${LIST_FILE}.old"
+    echo "Updated ${LIST_FILE}, old file can be found in ${LIST_FILE}.old"
 }
 
+# adds an entry into $LIST_FILE
 add_to_list_file() {
-    # adds an entry into $LIST_FILE
-    local name=$1
-    local path=$2
-    [ -z $2 ] && path=$PWD # if path not providied use $PWD
-    [ -z $1 ] && name=$(basename $path) # if name not providid use basename of $path
+    local path=$1
+    local name=$2
+    [ -z $1 ] && path=$PWD # if path not providied use $PWD
+    [ -z $2 ] && name=$(basename $path) # if name not providid, use basename
 
     # dots doesnt work in session_name, replace with _
     name=$(echo $name | tr '.' '_')
