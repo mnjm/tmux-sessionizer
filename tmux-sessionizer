@@ -32,7 +32,7 @@ display_help() {
 list_sessions() {
     # echo sessions
     tmux list-sessions -F "#{session_name}" 2>> /dev/null | while read sess; do
-        echo "t: ${sess}"
+        echo -e "\e[32m${sess}\e[0m"
     done
 }
 
@@ -41,19 +41,19 @@ list_file_entries() {
         local name="${entry% *}"
         # Removes duplicates whose session already exists.
         if ! tmux has-session -t $name 2>/dev/null; then
-            echo "d: ${entry}"
+            echo -e "\e[34m${entry}\e[0m"
         fi
     done
 }
 
 switch() {
     # fzf through entries
-    local selected=$( echo "$(list_sessions) $(list_file_entries)" | $FZF_COMMAND \
-        --reverse --no-multi --print-query --delimiter=' ' --nth=2 --with-nth=1,2 \
+    local selected=$( echo -e "$(list_sessions)\n$(list_file_entries)" | $FZF_COMMAND \
+        --reverse --no-multi --print-query --delimiter=' ' --with-nth=1 --ansi \
         --preview "tmux-sessionizer __preview__ {}" --preview-window right,80% | tail -n1 )
     # split name and path
-    local name=$(echo $selected | cut -f2 -d' ')
-    local path=$(echo $selected | cut -f3 -d' ')
+    local name=$(echo $selected | cut -f1 -d' ')
+    local path=$(echo $selected | cut -f2 -d' ')
     local tmux_running=$(pgrep tmux)
     [ -z $path ] && path="$HOME"
     if [[ -n $selected ]]; then
@@ -70,8 +70,8 @@ switch() {
 
 tmux_sessionzier_previewer() {
     # function reserved to be called as fzf previewer
-    local name=$(echo $1 | cut -f2 -d' ')
-    local path=$(echo $1 | cut -f3 -d' ')
+    local name=$(echo $1 | cut -f1 -d' ')
+    local path=$(echo $1 | cut -f2 -d' ')
     if tmux has-session -t $name 2>/dev/null; then
         tmux capture-pane -e -pt $name
     else
