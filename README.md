@@ -2,12 +2,33 @@
 
 TMUX Sessionizer is a fzf-based tmux session and project switcher written in Bash.
 
-<!-- TODO: add demo -->
-<!-- Highlight some alternatives -->
-<!-- and why I resorted to writing my own -->
-<!-- https://github.com/edr3x/tmux-sessionizer -->
-<!-- https://github.com/ThePrimeagen/.dotfiles/blob/master/bin/.local/scripts/tmux-sessionizer -->
-<!-- https://github.com/jrmoulton/tmux-sessionizer -->
+![Demo.gif](https://github.com/mnjm/github-media-repo/blob/main/tmux-sessionizer/demo.gif?raw=true)
+
+This is heavily based upon [ThePrimeagen](https://www.youtube.com/channel/UC8ENHE5xdFSwx71u3fDH5Xw)'s [tmux-sessionizer](https://github.com/ThePrimeagen/.dotfiles/blob/master/bin/.local/scripts/tmux-sessionizer) which I found a little non flexible. Let me explain
+
+1. Sometimes, I open Tmux sessions for general use outside of specific projects and wanted a tool that lists these one-off sessions alongside projects.
+2. My project organization is a bit haphazard, with entirely different directory structures for my work and personal projects.
+3. I've integrated `git worktree` into my projects, so was looking for a tool that can handle such worktree branchs as well.
+
+**How does this tmux-sessionizer work?**
+
+This tool navigates through project listings in a file (Default: `$HOME/.projects-tmux-sessionizer.list`) for predefined projects. The file contains a list of session/project names with their directories. You can add new entries using `tmux-sessionizer add` or edit them with `tmux-sessionizer edit`. It first displays Tmux sessions, followed by the defined project listings, and supports previews.
+
+<alternatives>
+   <summary> **Some other similar alternatives.** </summary>
+
+- [jrmoulton/tmux-sessionizer](https://github.com/jrmoulton/tmux-sessionizer) - more "feature reach" and built using rust
+- [joshmedeski/t-smart-tmux-session-manager](https://github.com/joshmedeski/t-smart-tmux-session-manager) - uses [zoxide](https://github.com/ajeetdsouza/zoxide)
+- [joshmedeski/sesh](https://github.com/joshmedeski/sesh) - from t-smart-tmux-session-manager's dev built using go
+
+</alternatives>
+
+## Commands
+
+- `tmux-sessionizer switch`: Fuzzy search through Tmux sessions and projects and switch/create a session for the selected entry.
+- `tmux-sessionizer add [path] [name]`: Add a new entry to the list file with the specified path and session name. If no name is provided, it defaults to the basename of the path. If neither name nor path is provided, it uses the current directory, setting the session name as the current directory's name.
+- `tmux-sessionizer edit`: Opens the sessionizer list file in editor. Refers `$EDITOR`, if not provided defaults to `vi`.
+- `tmux-sessionizer sanitize`: Remove duplicate and non-reachable entries from the list file.
 
 ## Installation
 
@@ -46,19 +67,13 @@ TMUX Sessionizer is a fzf-based tmux session and project switcher written in Bas
    bind s display-popup 'tmux-sessionizer switch'
    ```
 
-### Commands
-
-- `tmux-sessionizer switch`: Switch to an existing session or create a new session based on the selected entry from the list.
-- `tmux-sessionizer add [path] [name]`: Add a new entry to the list file with the specified path and session name. If no name is provided, it defaults to the basename of the path. If neither name nor path is provided, it uses the current directory, setting the session name as the current directory's name.
-- `tmux-sessionizer edit`: Opens the sessionizer list file in editor. Refers `$EDITOR`, if not provided defaults to `vi`.
-- `tmux-sessionizer sanitize`: Remove duplicate and non-reachable entries from the list file.
-
-## Configuration
+### Configuration
 
 Environment variables
 
 - `TMUX_SEZ_LIST_FILE`: Path to the list file. Default: `$HOME/.projects-tmux-sessionizer.list`
 - `TMUX_SEZ_FZF_COMMAND`: Custom fzf command. Default: `fzf --height 100%`
+
 
 ## Contributing
 

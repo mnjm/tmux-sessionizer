@@ -27,7 +27,6 @@ list_sessions() {
     local cur_sess=""
     [ -v TMUX ] && cur_sess=$(tmux display-message -p "#S")
     tmux list-sessions -F "#{session_name}" 2>> /dev/null | while read sess; do
-        # skip current session
         if [[ $sess != $cur_sess ]]; then
             echo -e "\e[32m${sess}\e[0m"
         fi
@@ -51,15 +50,12 @@ switch() {
     local file_entries=$(list_file_entries)
     [ ! -z "$sessions" ] && [ ! -z "$file_entries" ] && sessions="${sessions}\n"
 
-    # fzf through both list_sessions and list_file_entries
     local selected=$( echo -e "$sessions$file_entries" | $FZF_COMMAND \
         --reverse --no-multi --print-query --delimiter=' ' --with-nth=1 --ansi \
         --preview "tmux-sessionizer __preview__ {}" --preview-window right,80% | tail -n1 )
 
-    # split name and path
     local name=$(echo $selected | cut -f1 -d' ')
     local path=$(echo $selected | cut -f2 -d' ')
-    # in case a new session is created
     [ -z $path ] && path="$HOME"
 
     # create / switch to selected session
@@ -101,7 +97,7 @@ sanitize_list_file() {
     cat $LIST_FILE | while read line; do 
         local name="${line% *}"
         local path="${line#* }"
-        # dots doesnt work in session_name, replace with _
+        # . doesnt work in session_name, replace with _
         name=$(echo $name | tr '.' '_')
         if [ -d "$path" ]; then
             echo "$name $path" >> $tmp_file
@@ -110,11 +106,9 @@ sanitize_list_file() {
         fi
     done
 
-    # Remove any duplicate entries
     echo "Removing duplicate entries"
     gawk -i inplace '!seen[$1]++' $tmp_file
 
-    # update the file
     mv $LIST_FILE $LIST_FILE.old
     mv $tmp_file $LIST_FILE
     echo "Updated ${LIST_FILE}, old file can be found in ${LIST_FILE}.old"
@@ -124,17 +118,16 @@ sanitize_list_file() {
 add_to_list_file() {
     local path=$1
     local name=$2
-    [ -z "$1" ] && path=$PWD # if path not providied use $PWD
-    [ -z "$2" ] && name=$(basename $path) # if name not providid, use basename
+    [ -z "$1" ] && path=$PWD 
+    [ -z "$2" ] && name=$(basename $path) 
 
-    # dots doesnt work in session_name, replace with _
+    # . doesnt work in session_name, replace with _
     name=$(echo $name | tr '.' '_')
 
     # add a new entry to LIST_FILE
     echo "$name $path" >> $LIST_FILE
     echo "Added $name -> $path to $LIST_FILE"
 
-    # sanitize at the end
     sanitize_list_file
 }
 
