@@ -1,5 +1,5 @@
-# tmux-sessionizer
-Tmux Sessionizer: Bash script for creating/switching between tmux sessions using fzf
+# Tmux-Sessionizer
+Bash script for creating/switching between project tmux sessions using fzf.
 
 Options:
 

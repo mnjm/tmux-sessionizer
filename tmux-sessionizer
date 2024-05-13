@@ -13,31 +13,25 @@
 # Repo: github.com/mnjm/tmux-sessionizer
 # License: MIT
 
-PROJECTS_LIST_FILE=${TMUX_SEZ_LIST_FILE:-"$HOME/.projects-tmux-sessionizer.list"}
+LIST_FILE=${TMUX_SEZ_LIST_FILE:-"$HOME/.projects-tmux-sessionizer.list"}
 FZF_COMMAND=${TMUX_SEZ_FZF_COMMAND:-"fzf --height 100%"}
-[ -f "$PROJECTS_LIST_FILE" ] && touch $PROJECTS_LIST_FILE # Create list file if doesnt exists
-
-pretty_print() {
-    color=${2:-6}
-    tput setaf $color; echo $1; tput sgr0
-}
+[ -f "$LIST_FILE" ] && touch $LIST_FILE # Create list file if doesnt exists
 
 display_help() {
-    pretty_print "TMUX Sessionizer - fzf based tmux session/project switcher"
-    echo "Options:"
-    echo "add <name> <path> - adds the entry to the switcher list (<name> - session name, <path> - dir where tmux session should start from)"
-    echo "switch - opens tmux session switcher"
+    echo "TMUX Sessionizer - fzf based tmux session/project switcher"
+    echo "For more info check https://github.com/mnjm/tmux-sessionizer"
 }
 
+# List tmux session names with color codes
 list_sessions() {
-    # echo sessions
     tmux list-sessions -F "#{session_name}" 2>> /dev/null | while read sess; do
         echo -e "\e[32m${sess}\e[0m"
     done
 }
 
+# List entries in $LIST_FILE with color codes
 list_file_entries() {
-    cat $PROJECTS_LIST_FILE 2>> /dev/null | while read entry; do
+    cat $LIST_FILE 2>> /dev/null | while read entry; do
         local name="${entry% *}"
         # Removes duplicates whose session already exists.
         if ! tmux has-session -t $name 2>/dev/null; then
@@ -46,21 +40,25 @@ list_file_entries() {
     done
 }
 
+# tmux session switcher
 switch() {
-    # fzf through entries
+    # fzf through both list_sessions and list_file_entries
     local selected=$( echo -e "$(list_sessions)\n$(list_file_entries)" | $FZF_COMMAND \
         --reverse --no-multi --print-query --delimiter=' ' --with-nth=1 --ansi \
         --preview "tmux-sessionizer __preview__ {}" --preview-window right,80% | tail -n1 )
     # split name and path
     local name=$(echo $selected | cut -f1 -d' ')
     local path=$(echo $selected | cut -f2 -d' ')
-    local tmux_running=$(pgrep tmux)
+    # in case a new session is created
     [ -z $path ] && path="$HOME"
+
+    # create / switch to selected session
     if [[ -n $selected ]]; then
-        if [ [ -z "$TMUX" ] && [ -z "$tmux_running" ] ]; then
+        local tmux_running=$(pgrep tmux)
+        if [ [ -z "$TMUX" ] && [ -z "$tmux_running" ] ]; then # if tmux is not running
             tmux new -As $name -c $path
         else
-            if  ! tmux has-session -t $name 2>/dev/null; then
+            if  ! tmux has-session -t $name 2>/dev/null; then # if session not found
                 tmux new -ds $name -c $path
             fi
             tmux switch-client -t $name
@@ -68,6 +66,7 @@ switch() {
     fi
 }
 
+# preview for entries, if it is a session then capture-pane else list dir contents
 tmux_sessionzier_previewer() {
     # function reserved to be called as fzf previewer
     local name=$(echo $1 | cut -f1 -d' ')
@@ -75,52 +74,58 @@ tmux_sessionzier_previewer() {
     if tmux has-session -t $name 2>/dev/null; then
         tmux capture-pane -e -pt $name
     else
-        tput setaf 8; echo -n "Session Name: "; tput setaf 3; echo "$name"; tput sgr0
-        tput setaf 8; echo -n "Dir: "; tput setaf 6; echo "$path"; tput sgr0
-        pretty_print "--------------------------------" 8
+        echo -e "Session Name: \e[4m\e[34m$name\e[0m"
+        echo -e "Dir: \e[35m$path\e[0m"
+        echo "-----------------------------------------------"
         ls --group-directories-first --color=always $path
     fi
 }
 
 # remove duplicates and deleted dirs, replace . in session names with _
 sanitize_list_file() {
-    echo "Sanitizing $PROJECTS_LIST_FILE"
-    # Remove any duplicates in the list
-    gawk -i inplace '!a[$0]++' $PROJECTS_LIST_FILE
+    echo "Sanitizing $LIST_FILE"
+    echo "--------------------"
 
-    local tmp_file=$(mktemp tms.XXXXX -p /tmp/)
-
+    echo "Removing non-reachable entries"
     # go through each entry and sanitize
-    cat $PROJECTS_LIST_FILE | while read line; do 
+    local tmp_file=$(mktemp tms.XXXXX -p /tmp/)
+    cat $LIST_FILE | while read line; do 
         local name="${line% *}"
         local path="${line#* }"
+        # dots doesnt work in session_name, replace with _
         name=$(echo $name | tr '.' '_')
         if [ -d "$path" ]; then
             echo "$name $path" >> $tmp_file
         else
-            pretty_print "Skipping $name: Dir not found $path" 1
+            echo "Removing $name: $path not reachable"
         fi
     done
 
-    mv $tmp_file $PROJECTS_LIST_FILE
+    # Remove any duplicate entries
+    echo "Removing duplicate entries"
+    gawk -i inplace '!seen[$1]++' $tmp_file
+
+    # update the file
+    mv $LIST_FILE $LIST_FILE.old
+    mv $tmp_file $LIST_FILE
+    echo "Updated ${LIST_FILE}. old file can be found in ${LIST_FILE}.old"
 }
 
 add_to_list_file() {
-    # adds an entry into Project list file
+    # adds an entry into $LIST_FILE
     local name=$1
     local path=$2
-    if [ -z $2 ]; then
-        path=$PWD
-    fi
-    if [ -z $1 ]; then
-        name=$(basename $path)
-    fi
+    [ -z $2 ] && path=$PWD # if path not providied use $PWD
+    [ -z $1 ] && name=$(basename $path) # if name not providid use basename of $path
+
     # dots doesnt work in session_name, replace with _
     name=$(echo $name | tr '.' '_')
-    # add a new entry to PROJECTS_LIST_FILE
-    echo "$name $path" >> $PROJECTS_LIST_FILE
-    pretty_print "Added $name -> $path to $PROJECTS_LIST_FILE"
 
+    # add a new entry to LIST_FILE
+    echo "$name $path" >> $LIST_FILE
+    echo "Added $name -> $path to $LIST_FILE"
+
+    # sanitize at the end
     sanitize_list_file
 }
 
