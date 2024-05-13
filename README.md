@@ -14,14 +14,15 @@ This is heavily based upon [ThePrimeagen](https://www.youtube.com/channel/UC8ENH
 
 This tool navigates through project listings in a file (Default: `$HOME/.projects-tmux-sessionizer.list`) for predefined projects. The file contains a list of session/project names with their directories. You can add new entries using `tmux-sessionizer add` or edit them with `tmux-sessionizer edit`. It first displays Tmux sessions, followed by the defined project listings, and supports previews.
 
-<alternatives>
-   <summary> **Some other similar alternatives.** </summary>
+<details>
+   
+   <summary>Some other similar alternatives.</summary>
 
 - [jrmoulton/tmux-sessionizer](https://github.com/jrmoulton/tmux-sessionizer) - more "feature reach" and built using rust
 - [joshmedeski/t-smart-tmux-session-manager](https://github.com/joshmedeski/t-smart-tmux-session-manager) - uses [zoxide](https://github.com/ajeetdsouza/zoxide)
 - [joshmedeski/sesh](https://github.com/joshmedeski/sesh) - from t-smart-tmux-session-manager's dev built using go
 
-</alternatives>
+</details>
 
 ## Commands
 
