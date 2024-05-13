@@ -5,6 +5,9 @@ TMUX Sessionizer is a fzf-based tmux session and project switcher written in Bas
 <!-- TODO: add demo -->
 <!-- Highlight some alternatives -->
 <!-- and why I resorted to writing my own -->
+<!-- https://github.com/edr3x/tmux-sessionizer -->
+<!-- https://github.com/ThePrimeagen/.dotfiles/blob/master/bin/.local/scripts/tmux-sessionizer -->
+<!-- https://github.com/jrmoulton/tmux-sessionizer -->
 
 ## Installation
 
@@ -20,7 +23,23 @@ TMUX Sessionizer is a fzf-based tmux session and project switcher written in Bas
    export PATH="~/tmux-sessionizer:$PATH"
    ```
 
-3. Optionally, you can add it as a binding in your tmux config (.tmux.conf):
+   (or) Copy / link `tmux-sessionizer` script in one of the entries directory in your `$PATH` For ex. `~/.local/bin`
+
+   ```bash
+   cd ./tmux-sessionizer
+   cp ./tmux-sessionizer ~/.local/bin
+   (or)
+   ln -s $(realpath tmux-sessionizer) ~/.local/bin/
+   ```
+
+4. (Optional) you can add it as an alias in your shell config (.bashrc or .zshrc):
+
+   ```bash
+   alias tmuxs='tmux-sessionizer switch'
+   alias tmuxs-add='tmux-sessionizer add'
+   ```
+
+3. (Optional) you can add it as a binding in your tmux config (.tmux.conf):
 
    ```tmux
    bind s display-popup 'tmux-sessionizer switch'
