@@ -4,15 +4,15 @@ TMUX Sessionizer is a fzf-based tmux session and project switcher written in Bas
 
 ![Demo.gif](https://github.com/mnjm/github-media-repo/blob/main/tmux-sessionizer/demo.gif?raw=true)
 
-This is heavily based upon [ThePrimeagen](https://www.youtube.com/channel/UC8ENHE5xdFSwx71u3fDH5Xw)'s [tmux-sessionizer](https://github.com/ThePrimeagen/.dotfiles/blob/master/bin/.local/scripts/tmux-sessionizer) which I found a little non flexible. Let me explain
+This is heavily based upon [ThePrimeagen](https://www.youtube.com/channel/UC8ENHE5xdFSwx71u3fDH5Xw)'s [tmux-sessionizer](https://github.com/ThePrimeagen/.dotfiles/blob/master/bin/.local/scripts/tmux-sessionizer) which I found a little non flexible.
 
-1. Sometimes, I open Tmux sessions for general use outside of specific projects and wanted a tool that lists these one-off sessions alongside projects.
+1. Sometimes, I open Tmux sessions for general use outside of specific projects and wanted a script that lists these one-off sessions alongside projects.
 2. My project organization is a bit haphazard, with entirely different directory structures for my work and personal projects.
-3. I've integrated `git worktree` into my projects, so was looking for a tool that can handle such worktree branchs as well.
+3. I've integrated `git worktree` into my projects, so was looking for a script that can handle such worktree branchs as well.
 
 **How does this tmux-sessionizer work?**
 
-This tool navigates through project listings in a file (Default: `$HOME/.projects-tmux-sessionizer.list`) for predefined projects. The file contains a list of session/project names with their directories. You can add new entries using `tmux-sessionizer add` or edit them with `tmux-sessionizer edit`. It first displays Tmux sessions, followed by the defined project listings, and supports previews.
+This script first lists Tmux sessions in FZF, then projects from a file (Default: `$HOME/.tmux-sessionizer.list`). You can add or edit entries with `tmux-sessionizer add` or `tmux-sessionizer edit`.
 
 <details>
    
@@ -72,7 +72,7 @@ This tool navigates through project listings in a file (Default: `$HOME/.project
 
 Environment variables
 
-- `TMUX_SEZ_LIST_FILE`: Path to the list file. Default: `$HOME/.projects-tmux-sessionizer.list`
+- `TMUX_SEZ_LIST_FILE`: Path to the list file. Default: `$HOME/.tmux-sessionizer.list`
 - `TMUX_SEZ_FZF_COMMAND`: Custom fzf command. Default: `fzf --height 100%`
 
 

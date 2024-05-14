@@ -13,7 +13,7 @@
 # Repo: github.com/mnjm/tmux-sessionizer
 # License: MIT
 
-LIST_FILE=${TMUX_SEZ_LIST_FILE:-"$HOME/.projects-tmux-sessionizer.list"}
+LIST_FILE=${TMUX_SEZ_LIST_FILE:-"$HOME/.tmux-sessionizer.list"}
 FZF_COMMAND=${TMUX_SEZ_FZF_COMMAND:-"fzf --height 100%"}
 [ -f "$LIST_FILE" ] || touch $LIST_FILE # Create list file if doesnt exists
 
@@ -89,10 +89,8 @@ tmux_sessionzier_previewer() {
 # remove duplicates and deleted dirs, replace . in session names with _
 sanitize_list_file() {
     echo "Sanitizing $LIST_FILE"
-    echo "--------------------"
 
-    echo "Removing non-reachable entries"
-    # go through each entry and sanitize
+    # go through each entry - sanitize session name and remove non reachable entries
     local tmp_file=$(mktemp tms.XXXXX -p /tmp/)
     cat $LIST_FILE | while read line; do 
         local name="${line% *}"
@@ -102,23 +100,37 @@ sanitize_list_file() {
         if [ -d "$path" ]; then
             echo "$name $path" >> $tmp_file
         else
-            echo "Removing $name: $path not reachable"
+            >&2 echo "Removing $name: $path not reachable"
         fi
     done
 
-    echo "Removing duplicate entries"
+    # Removing duplicate entries
     gawk -i inplace '!seen[$1]++' $tmp_file
 
-    mv $LIST_FILE $LIST_FILE.old
-    mv $tmp_file $LIST_FILE
-    echo "Updated ${LIST_FILE}, old file can be found in ${LIST_FILE}.old"
+    # update file only if there's changes
+    if [[ $(diff $LIST_FILE $tmp_file | wc -l) -eq 0 ]]; then
+        rm $tmp_file
+    else
+        mv $LIST_FILE $LIST_FILE.old
+        mv $tmp_file $LIST_FILE
+        echo "Updated ${LIST_FILE}, old file can be found in ${LIST_FILE}.old"
+    fi
 }
 
 # adds an entry into $LIST_FILE
 add_to_list_file() {
     local path=$1
     local name=$2
-    [ -z "$1" ] && path=$PWD 
+
+    if [ -z "$path" ]; then
+        path=$PWD
+    else
+        if [ ! -d "$path" ]; then
+            >&2 echo "Error: $path is not a directory"
+            return 12
+        fi
+        path=$(realpath $path)
+    fi
     [ -z "$2" ] && name=$(basename $path) 
 
     # . doesnt work in session_name, replace with _
@@ -131,11 +143,17 @@ add_to_list_file() {
     sanitize_list_file
 }
 
+# open list file in editor
+edit_list_file() {
+    ${EDITOR:-vim} $LIST_FILE
+    sanitize_list_file
+}
+
 case $1 in
     add) add_to_list_file $2 $3;;
     switch) switch ;;
     sanitize) sanitize_list_file ;;
-    edit) ${EDITOR:-vi} $LIST_FILE ;;
+    edit) edit_list_file ;;
     __preview__) tmux_sessionzier_previewer "$2";;
     *) display_help ;;
 esac
