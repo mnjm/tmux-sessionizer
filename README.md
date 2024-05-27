@@ -7,7 +7,7 @@ TMUX Sessionizer is a fzf-based tmux session and project switcher written in Bas
 This is heavily based upon [ThePrimeagen](https://www.youtube.com/channel/UC8ENHE5xdFSwx71u3fDH5Xw)'s [tmux-sessionizer](https://github.com/ThePrimeagen/.dotfiles/blob/master/bin/.local/scripts/tmux-sessionizer) which I found a little non flexible.
 
 1. Sometimes, I open Tmux sessions for general use outside of specific projects and wanted a script that lists these one-off sessions alongside projects.
-2. My project organization is a bit haphazard, with entirely different directory structures for my work and personal projects.
+2. My projects organization is somewhat disorganized, as I use entirely different directory structures for my work and personal projects.
 3. I've integrated `git worktree` into my projects, so was looking for a script that can handle such worktree branchs as well.
 
 **How does this tmux-sessionizer work?**
@@ -27,8 +27,8 @@ This script first lists Tmux sessions in FZF, then projects from a file (Default
 ## Commands
 
 - `tmux-sessionizer switch`: Fuzzy search through Tmux sessions and projects and switch/create a session for the selected entry.
-- `tmux-sessionizer add [path] [name]`: Add a new entry to the list file with the specified path and session name. If no name is provided, it defaults to the basename of the path. If neither name nor path is provided, it uses the current directory, setting the session name as the current directory's name.
-- `tmux-sessionizer edit`: Opens the sessionizer list file in editor. Refers `$EDITOR`, if not provided defaults to `vi`.
+- `tmux-sessionizer add [path] [name]`: Add a new entry to the list file with the specified path and session name. If no path is provided, it defaults to pwd. If no name is provided, it defaults to basename of path.
+- `tmux-sessionizer edit`: Opens the sessionizer list file in editor. Refers `$EDITOR`, if not provided defaults to `vim`.
 - `tmux-sessionizer sanitize`: Remove duplicate and non-reachable entries from the list file.
 
 ## Installation
