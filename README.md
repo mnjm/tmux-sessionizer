@@ -15,7 +15,7 @@ This is heavily based upon [ThePrimeagen](https://www.youtube.com/channel/UC8ENH
 This script first lists Tmux sessions in FZF, then projects from a file (Default: `$HOME/.tmux-sessionizer.list`). You can add or edit entries with `tmux-sessionizer add` or `tmux-sessionizer edit`.
 
 <details>
-   
+
    <summary>Some other similar alternatives.</summary>
 
 - [jrmoulton/tmux-sessionizer](https://github.com/jrmoulton/tmux-sessionizer) - more "feature reach" and built using rust
@@ -73,7 +73,7 @@ This script first lists Tmux sessions in FZF, then projects from a file (Default
 Environment variables
 
 - `TMUX_SEZ_LIST_FILE`: Path to the list file. Default: `$HOME/.tmux-sessionizer.list`
-- `TMUX_SEZ_FZF_COMMAND`: Custom fzf command. Default: `fzf --height 100%`
+- `TMUX_SEZ_FZF_COMMAND`: Custom fzf command. Default: `fzf --height 100% --reverse`
 
 
 ## Contributing

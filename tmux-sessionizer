@@ -14,7 +14,7 @@
 # License: MIT
 
 LIST_FILE=${TMUX_SEZ_LIST_FILE:-"$HOME/.tmux-sessionizer.list"}
-FZF_COMMAND=${TMUX_SEZ_FZF_COMMAND:-"fzf --height 100%"}
+FZF_COMMAND=${TMUX_SEZ_FZF_COMMAND:-"fzf --height 100% --reverse"}
 [ -f "$LIST_FILE" ] || touch $LIST_FILE # Create list file if doesnt exists
 
 display_help() {
@@ -51,7 +51,7 @@ switch() {
     [ ! -z "$sessions" ] && [ ! -z "$file_entries" ] && sessions="${sessions}\n"
 
     local selected=$( echo -e "$sessions$file_entries" | $FZF_COMMAND \
-        --reverse --no-multi --print-query --delimiter=' ' --with-nth=1 --ansi \
+        --no-multi --print-query --delimiter=' ' --with-nth=1 --ansi \
         --preview "tmux-sessionizer __preview__ {}" --preview-window right,80% | tail -n1 )
 
     local name="${selected%% *}"
